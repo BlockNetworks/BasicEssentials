@@ -8,6 +8,7 @@ use bedrockplay\basicessentials\commands\AddCoinsCommand;
 use bedrockplay\basicessentials\commands\BanCommand;
 use bedrockplay\basicessentials\commands\CoinsCommand;
 use bedrockplay\basicessentials\commands\SetRankCommand;
+use bedrockplay\basicessentials\task\BroadcastTask;
 use bedrockplay\openapi\ranks\RankDatabase;
 use bedrockplay\openapi\servers\ServerManager;
 use pocketmine\event\Listener;
@@ -26,6 +27,8 @@ class BasicEssentials extends PluginBase implements Listener {
 
     public function onEnable() {
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
+
+        $this->getScheduler()->scheduleRepeatingTask(new BroadcastTask($this), 20 * 60 * 5); // Every 5 minutes
 
         $this->getServer()->getCommandMap()->register("BasicEssentials", new AddCoinsCommand());
         $this->getServer()->getCommandMap()->register("BasicEssentials", new BanCommand());
