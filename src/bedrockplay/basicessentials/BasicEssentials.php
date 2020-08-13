@@ -9,12 +9,12 @@ use bedrockplay\basicessentials\commands\BanCommand;
 use bedrockplay\basicessentials\commands\CoinsCommand;
 use bedrockplay\basicessentials\commands\SetRankCommand;
 use bedrockplay\basicessentials\task\BroadcastTask;
+use bedrockplay\openapi\lang\Translator;
 use bedrockplay\openapi\ranks\RankDatabase;
 use bedrockplay\openapi\servers\ServerManager;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\plugin\PluginBase;
-use vixikhd\bpcore\api\language\T;
 
 /**
  * Class BasicEssentials
@@ -64,7 +64,7 @@ class BasicEssentials extends PluginBase implements Listener {
         if($delay > 0) {
             // TODO - Move Language API from BPCore to OpenAPI
             if(isset($this->chatDelays[$player->getName()]) && microtime(true) - $this->chatDelays[$player->getName()] <= $delay) {
-                $player->sendMessage(T::trp($player, "chat-limit", [(string)round($delay - abs( $this->chatDelays[$player->getName()] - microtime(true)), 2)], T::PREFIX_CHAT));
+                $player->sendMessage(Translator::translateMessageWithPrefix($player, "chat-limit", Translator::PREFIX_CHAT, [(string)round($delay - abs( $this->chatDelays[$player->getName()] - microtime(true)), 2)]));
                 $event->setCancelled(true);
             }
             else {
@@ -82,7 +82,7 @@ class BasicEssentials extends PluginBase implements Listener {
             }
 
             if($upperLetters > 5) {
-                $player->sendMessage(T::trp($player,"chat-caps", [], T::PREFIX_CHAT));
+                $player->sendMessage(Translator::translateWithPrefix($player,"chat-caps", Translator::PREFIX_CHAT));
                 $event->setMessage(ucfirst(strtolower($event->getMessage())));
             }
         }
@@ -101,7 +101,7 @@ class BasicEssentials extends PluginBase implements Listener {
             }
 
             if($problemFound) {
-                $player->sendMessage(T::trp($player,"chat-advertisement", [], T::PREFIX_CHAT));
+                $player->sendMessage(Translator::translateMessageWithPrefix($player,"chat-advertisement",Translator::PREFIX_CHAT));
                 $event->setCancelled(true);
             }
         }
