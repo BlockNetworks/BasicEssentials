@@ -1,0 +1,8 @@
+--- # Poggit-CI Manifest. Open the CI at https://poggit.pmmp.io/ci/BedrockPlay/BasicEssentials
+build-by-default: true
+branches:
+- master
+projects:
+  BasicEssentials:
+    path: ""
+...
