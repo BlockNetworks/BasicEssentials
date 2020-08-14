@@ -7,6 +7,7 @@ namespace bedrockplay\basicessentials;
 use bedrockplay\basicessentials\commands\AddCoinsCommand;
 use bedrockplay\basicessentials\commands\BanCommand;
 use bedrockplay\basicessentials\commands\CoinsCommand;
+use bedrockplay\basicessentials\commands\ScoreboardCommand;
 use bedrockplay\basicessentials\commands\SetRankCommand;
 use bedrockplay\basicessentials\task\BroadcastTask;
 use bedrockplay\openapi\lang\Translator;
@@ -33,6 +34,7 @@ class BasicEssentials extends PluginBase implements Listener {
         $this->getServer()->getCommandMap()->register("BasicEssentials", new AddCoinsCommand());
         $this->getServer()->getCommandMap()->register("BasicEssentials", new BanCommand());
         $this->getServer()->getCommandMap()->register("BasicEssentials", new CoinsCommand());
+        $this->getServer()->getCommandMap()->register("BasicEssentials", new ScoreboardCommand());
         $this->getServer()->getCommandMap()->register("BasicEssentials", new SetRankCommand());
     }
 
