@@ -5,4 +5,6 @@ branches:
 projects:
   BasicEssentials:
     path: ""
+    libs:
+      - src: BedrockPlay/OpenAPI/OpenAPI
 ...
