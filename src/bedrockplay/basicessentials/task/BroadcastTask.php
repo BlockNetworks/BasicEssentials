@@ -14,12 +14,12 @@ use pocketmine\scheduler\Task;
 class BroadcastTask extends Task {
 
     public const BROADCASTER_MESSAGES = [
-        "Vote for our server on bit.do/bedrockplay and get lots of advantages!",
-        "Visit our online store at bedrockplay.tebex.io!",
-        "We have released new web page! Take a look at bedrockplay.eu!",
-        "Join our discord server at discord.io/bedrockplay",
-        "Change your language using /lang",
-        "We host our servers at tradehosting.it!"
+        "Vote for our server at https://bit.do/bedrockplay and receive some epic rewards!",
+        "Make sure to visit our online store at https://bedrockplay.tebex.io!",
+        "Need information? Visit our official website https://bedrockplay.eu!",
+        "Join our discord server at https://discord.io/bedrockplay",
+        "Not your language? Do /lang",
+        "Our servers are hosted by https://tradehosting.it!"
     ];
 
     /** @var BasicEssentials $plugin */
@@ -39,7 +39,7 @@ class BroadcastTask extends Task {
     public function onRun(int $currentTick) {
         $message = self::BROADCASTER_MESSAGES[array_rand(self::BROADCASTER_MESSAGES, 1)];
         foreach ($this->plugin->getServer()->getOnlinePlayers() as $player) {
-            $player->sendMessage("§9Tip> §7{$message}");
+            $player->sendMessage("§9§l>§r §7{$message}");
         }
     }
 }
