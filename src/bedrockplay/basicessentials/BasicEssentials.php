@@ -13,8 +13,12 @@ use bedrockplay\basicessentials\task\BroadcastTask;
 use bedrockplay\openapi\lang\Translator;
 use bedrockplay\openapi\ranks\RankDatabase;
 use bedrockplay\openapi\servers\ServerManager;
+use bedrockplay\openapi\utils\DeviceData;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
+use pocketmine\event\player\PlayerJoinEvent;
+use pocketmine\event\player\PlayerMoveEvent;
+use pocketmine\network\mcpe\protocol\MovePlayerPacket;
 use pocketmine\plugin\PluginBase;
 
 /**
@@ -113,5 +117,23 @@ class BasicEssentials extends PluginBase implements Listener {
         $chatColor = $player->hasPermission("bedrockplay.vip") ? "§f" : "§7";
         $fontHeightParameter = $rank->getName() === "Guest" ? "՗" : " ";
         $event->setFormat("{$rank->getFormatForChat()}§r§7{$player->getName()}§8:{$chatColor}{$fontHeightParameter}{$event->getMessage()}");
+    }
+
+    /**
+     * @param PlayerJoinEvent $event
+     */
+    public function onJoin(PlayerJoinEvent $event) {
+        $player = $event->getPlayer();
+        $player->setNameTag(RankDatabase::getPlayerRank($player)->getFormatForNameTag() . "§7{$player->getName()}\n§5" . DeviceData::getDeviceName($player));
+    }
+
+    /**
+     * @param PlayerMoveEvent $event
+     */
+    public function onMove(PlayerMoveEvent $event) {
+        $player = $event->getPlayer();
+        if(!$event->isCancelled()) {
+            $player->sendPosition($player, $player->yaw, $player->pitch, MovePlayerPacket::MODE_NORMAL, $player->getViewers());
+        }
     }
 }
