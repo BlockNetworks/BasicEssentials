@@ -39,7 +39,7 @@ class BroadcastTask extends Task {
     public function onRun(int $currentTick) {
         $message = self::BROADCASTER_MESSAGES[array_rand(self::BROADCASTER_MESSAGES, 1)];
         foreach ($this->plugin->getServer()->getOnlinePlayers() as $player) {
-            $player->sendMessage("§9§l>§r §7{$message}");
+            $player->sendMessage("§9Tip> §7{$message}");
         }
     }
 }
