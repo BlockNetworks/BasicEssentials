@@ -10,15 +10,23 @@ use bedrockplay\basicessentials\commands\CoinsCommand;
 use bedrockplay\basicessentials\commands\ScoreboardCommand;
 use bedrockplay\basicessentials\commands\SetRankCommand;
 use bedrockplay\basicessentials\task\BroadcastTask;
+use bedrockplay\openapi\bossbar\BossBarBuilder;
 use bedrockplay\openapi\lang\Translator;
 use bedrockplay\openapi\ranks\RankDatabase;
 use bedrockplay\openapi\servers\ServerManager;
 use bedrockplay\openapi\utils\DeviceData;
+use pocketmine\command\defaults\BanIpCommand;
+use pocketmine\command\defaults\PardonCommand;
+use pocketmine\command\defaults\PardonIpCommand;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\event\player\PlayerJoinEvent;
+use pocketmine\event\player\PlayerLoginEvent;
 use pocketmine\event\player\PlayerMoveEvent;
+use pocketmine\event\server\DataPacketReceiveEvent;
+use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
+use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\plugin\PluginBase;
 
 /**
@@ -35,6 +43,12 @@ class BasicEssentials extends PluginBase implements Listener {
 
         $this->getScheduler()->scheduleRepeatingTask(new BroadcastTask($this), 20 * 60 * 5); // Every 5 minutes
 
+        foreach ($this->getServer()->getCommandMap()->getCommands() as $command) {
+            if(in_array(get_class($command), [\pocketmine\command\defaults\BanCommand::class, BanIpCommand::class, PardonCommand::class, PardonIpCommand::class])) {
+                $this->getServer()->getCommandMap()->unregister($command);
+            }
+        }
+
         $this->getServer()->getCommandMap()->register("BasicEssentials", new AddCoinsCommand());
         $this->getServer()->getCommandMap()->register("BasicEssentials", new BanCommand());
         $this->getServer()->getCommandMap()->register("BasicEssentials", new CoinsCommand());
@@ -48,6 +62,18 @@ class BasicEssentials extends PluginBase implements Listener {
         }
 
         sleep(2);
+    }
+
+    /**
+     * @param DataPacketReceiveEvent $event
+     */
+    public function onPacketReceive(DataPacketReceiveEvent $event) {
+        $packet = $event->getPacket();
+        if($packet instanceof LoginPacket) {
+            if(in_array($packet->protocol, [407, 408, 409])) {
+                $packet->protocol = ProtocolInfo::CURRENT_PROTOCOL;
+            }
+        }
     }
 
     /**
@@ -125,6 +151,7 @@ class BasicEssentials extends PluginBase implements Listener {
     public function onJoin(PlayerJoinEvent $event) {
         $player = $event->getPlayer();
         $player->setNameTag(RankDatabase::getPlayerRank($player)->getFormatForNameTag() . "§7{$player->getName()}\n§5" . DeviceData::getDeviceName($player));
+        BossBarBuilder::sendBossBarText($player, "§eBedrock§6Play §7| §a". ServerManager::getCurrentServer()->getServerName());
     }
 
     /**
