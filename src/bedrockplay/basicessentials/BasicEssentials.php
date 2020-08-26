@@ -36,10 +36,17 @@ use pocketmine\scheduler\ClosureTask;
  */
 class BasicEssentials extends PluginBase implements Listener {
 
+    /** @var BasicEssentials $instance */
+    private static $instance;
+
     /** @var float[] $chatDelays */
     public $chatDelays = [];
+    /** @var array $muted */
+    public $muted = [];
 
     public function onEnable() {
+        self::$instance = $this;
+
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
 
         $this->getScheduler()->scheduleRepeatingTask(new BroadcastTask($this), 20 * 60 * 5); // Every 5 minutes
@@ -58,11 +65,13 @@ class BasicEssentials extends PluginBase implements Listener {
     }
 
     public function onDisable() {
+        $sleepTime = max(2, ((int)(count($this->getServer()->getOnlinePlayers()) / 10)));
+
         foreach ($this->getServer()->getOnlinePlayers() as $player) {
-            ServerManager::getServer("Lobby-1")->transferPlayerHere($player);
+            ServerManager::getServerGroup("Lobby")->getFitServer($player)->transferPlayerHere($player);
         }
 
-        sleep(2);
+        sleep($sleepTime);
     }
 
     /**
@@ -84,6 +93,15 @@ class BasicEssentials extends PluginBase implements Listener {
      */
     public function onChat(PlayerChatEvent $event) {
         $player = $event->getPlayer();
+
+        if(isset($this->muted[$player->getName()])) {
+            $unmuteTime = $this->muted[$player->getName()];
+            if(time() < $unmuteTime) {
+                $player->sendMessage("§9Chat> §cYou are muted.");
+            }
+
+            unset($this->muted[$player->getName()]);
+        }
 
         // Chat delay
         $delay = 2;
@@ -172,5 +190,12 @@ class BasicEssentials extends PluginBase implements Listener {
         if(!$event->isCancelled()) {
             $player->sendPosition($player, $player->yaw, $player->pitch, MovePlayerPacket::MODE_NORMAL, $player->getViewers());
         }
+    }
+
+    /**
+     * @return BasicEssentials
+     */
+    public static function getInstance(): BasicEssentials {
+        return self::$instance;
     }
 }

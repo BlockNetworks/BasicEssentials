@@ -43,7 +43,7 @@ class BanCommand extends Command {
      */
     public function __construct() {
         parent::__construct("ban", "Ban commands", null, []);
-        $this->setPermission("bp.staff");
+        $this->setPermission("bedrockplay.moderator");
     }
 
     /**
