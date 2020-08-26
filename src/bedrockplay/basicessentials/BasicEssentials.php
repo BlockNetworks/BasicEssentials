@@ -152,12 +152,14 @@ class BasicEssentials extends PluginBase implements Listener {
     public function onJoin(PlayerJoinEvent $event) {
         $player = $event->getPlayer();
         $player->setNameTag(RankDatabase::getPlayerRank($player)->getFormatForNameTag() . "§7{$player->getName()}\n§5" . DeviceData::getDeviceName($player));
+        $player->setImmobile();
 
         $this->getScheduler()->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use ($player): void {
             if($player === null || !$player->isOnline()) {
                 return;
             }
 
+            $player->setImmobile(false);
             BossBarBuilder::sendBossBarText($player, "§eBedrock§6Play §7| §a". ServerManager::getCurrentServer()->getServerName());
         }), 40);
     }
