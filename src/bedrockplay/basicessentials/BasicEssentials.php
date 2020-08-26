@@ -28,6 +28,7 @@ use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\plugin\PluginBase;
+use pocketmine\scheduler\ClosureTask;
 
 /**
  * Class BasicEssentials
@@ -151,7 +152,14 @@ class BasicEssentials extends PluginBase implements Listener {
     public function onJoin(PlayerJoinEvent $event) {
         $player = $event->getPlayer();
         $player->setNameTag(RankDatabase::getPlayerRank($player)->getFormatForNameTag() . "§7{$player->getName()}\n§5" . DeviceData::getDeviceName($player));
-        BossBarBuilder::sendBossBarText($player, "§eBedrock§6Play §7| §a". ServerManager::getCurrentServer()->getServerName());
+
+        $this->getScheduler()->scheduleDelayedTask(new ClosureTask(function (int $currentTick) use ($player): void {
+            if($player === null || !$player->isOnline()) {
+                return;
+            }
+
+            BossBarBuilder::sendBossBarText($player, "§eBedrock§6Play §7| §a". ServerManager::getCurrentServer()->getServerName());
+        }), 40);
     }
 
     /**
