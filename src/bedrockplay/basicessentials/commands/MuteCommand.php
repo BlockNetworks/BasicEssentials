@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace bedrockplay\basicessentials\commands;
 
+use bedrockplay\basicessentials\BasicEssentials;
+use bedrockplay\openapi\math\TimeFormatter;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
 use pocketmine\Server;
@@ -13,6 +15,7 @@ use pocketmine\Server;
  * @package bedrockplay\basicessentials\commands
  */
 class MuteCommand extends Command {
+    use TimeFormatter;
 
     /**
      * MuteCommand constructor.
@@ -43,7 +46,12 @@ class MuteCommand extends Command {
             return;
         }
 
-        $sender->sendMessage("§9Chat> §aPlayer muted!");
+        if(!$this->canFormatTime($args[1])) {
+            $sender->sendMessage("§9Chat> §cInvalid time specified");
+            return;
+        }
 
+        $sender->sendMessage("§9Chat> §aPlayer muted!");
+        BasicEssentials::getInstance()->muted[$player->getName()] = time() + $this->getTimeFromString($args[1]);
     }
 }

@@ -98,6 +98,8 @@ class BasicEssentials extends PluginBase implements Listener {
             $unmuteTime = $this->muted[$player->getName()];
             if(time() < $unmuteTime) {
                 $player->sendMessage("§9Chat> §cYou are muted.");
+                $event->setCancelled(true);
+                return;
             }
 
             unset($this->muted[$player->getName()]);
