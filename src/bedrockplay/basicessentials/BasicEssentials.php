@@ -18,15 +18,23 @@ use bedrockplay\openapi\utils\DeviceData;
 use pocketmine\command\defaults\BanIpCommand;
 use pocketmine\command\defaults\PardonCommand;
 use pocketmine\command\defaults\PardonIpCommand;
+use pocketmine\entity\projectile\Arrow;
+use pocketmine\event\entity\EntityDamageByChildEntityEvent;
+use pocketmine\event\entity\EntityDamageEvent;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerChatEvent;
 use pocketmine\event\player\PlayerJoinEvent;
 use pocketmine\event\player\PlayerLoginEvent;
 use pocketmine\event\player\PlayerMoveEvent;
 use pocketmine\event\server\DataPacketReceiveEvent;
+use pocketmine\level\sound\GenericSound;
+use pocketmine\network\mcpe\protocol\AddActorPacket;
+use pocketmine\network\mcpe\protocol\LevelEventPacket;
+use pocketmine\network\mcpe\protocol\LevelSoundEventPacket;
 use pocketmine\network\mcpe\protocol\LoginPacket;
 use pocketmine\network\mcpe\protocol\MovePlayerPacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
+use pocketmine\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\scheduler\ClosureTask;
 
@@ -65,10 +73,12 @@ class BasicEssentials extends PluginBase implements Listener {
     }
 
     public function onDisable() {
-        $sleepTime = max(2, ((int)(count($this->getServer()->getOnlinePlayers()) / 10)));
+        $sleepTime = max(3, ((int)(count($this->getServer()->getOnlinePlayers()) / 10)));
 
         foreach ($this->getServer()->getOnlinePlayers() as $player) {
-            ServerManager::getServerGroup("Lobby")->getFitServer($player)->transferPlayerHere($player);
+            $server = ServerManager::getServerGroup("Lobby")->getFitServer($player);
+            $player->sendMessage("§9Server> §6Transferring to {$server->getServerName()} due to server restart.");
+            $server->transferPlayerHere($player);
         }
 
         sleep($sleepTime);
@@ -115,7 +125,6 @@ class BasicEssentials extends PluginBase implements Listener {
         }
 
         if($delay > 0) {
-            // TODO - Move Language API from BPCore to OpenAPI
             if(isset($this->chatDelays[$player->getName()]) && microtime(true) - $this->chatDelays[$player->getName()] <= $delay) {
                 $player->sendMessage(Translator::translateMessageWithPrefix($player, "chat-limit", Translator::PREFIX_CHAT, [(string)round($delay - abs( $this->chatDelays[$player->getName()] - microtime(true)), 2)]));
                 $event->setCancelled(true);
@@ -191,6 +200,22 @@ class BasicEssentials extends PluginBase implements Listener {
         $player = $event->getPlayer();
         if(!$event->isCancelled()) {
             $player->sendPosition($player, $player->yaw, $player->pitch, MovePlayerPacket::MODE_NORMAL, $player->getViewers());
+        }
+    }
+
+    /**
+     * @param EntityDamageEvent $event
+     */
+    public function onDamage(EntityDamageEvent $event) {
+        $player = $event->getEntity();
+
+        if(strpos(ServerManager::getCurrentServer()->getServerName(), "Lobby") === false && $player instanceof Player && $event instanceof EntityDamageByChildEntityEvent) {
+            $arrow = $event->getChild();
+            $damager = $event->getDamager();
+            if($arrow instanceof Arrow && $damager instanceof Player) {
+                $damager->sendMessage("§9Game> §aPlayer is on " . (string)round($player->getHealth() - $event->getFinalDamage()) . " HP!");
+                $damager->getLevel()->addSound(new GenericSound($damager, LevelEventPacket::EVENT_SOUND_ORB), [$damager]);
+            }
         }
     }
 
