@@ -189,7 +189,7 @@ class BasicEssentials extends PluginBase implements Listener {
             }
 
             $player->setImmobile(false);
-            BossBarBuilder::sendBossBarText($player, "§eBedrock§6Play §7| §a". ServerManager::getCurrentServer()->getServerName());
+//            BossBarBuilder::sendBossBarText($player, "§eBedrock§6Play §7| §a". ServerManager::getCurrentServer()->getServerName());
         }), 40);
     }
 
